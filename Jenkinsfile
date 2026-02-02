@@ -2,31 +2,24 @@ pipeline {
     agent any
 
     environment {
-        PATH = "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"
-        JAVA_HOME = "/Library/Java/JavaVirtualMachines/jdk-21.jdk/Contents/Home"
+        // Correct Java 17 path from your system
+        JAVA_HOME = '/Library/Java/JavaVirtualMachines/jdk-17.jdk/Contents/Home'
+        PATH = "${JAVA_HOME}/bin:${env.PATH}"
     }
-
-    triggers {
-        // Poll SCM every 2 minutes for changes (for local Jenkins)
-        pollSCM('H/1 * * * *')
-
-        // Alternative: Use SCM webhook trigger (requires ngrok for local Jenkins)
-        // githubPush()
-    }
-
 
     options {
-        // Keep only last 10 builds
+        // Keep last 10 builds
         buildDiscarder(logRotator(numToKeepStr: '10'))
 
         // Timeout after 30 minutes
         timeout(time: 30, unit: 'MINUTES')
 
-        // Disable concurrent builds
+        // Disable parallel builds
         disableConcurrentBuilds()
     }
 
     stages {
+
         stage('Checkout') {
             steps {
                 echo 'Checking out source code...'
@@ -34,9 +27,17 @@ pipeline {
             }
         }
 
+        stage('Verify Java & Maven') {
+            steps {
+                sh 'echo JAVA_HOME=$JAVA_HOME'
+                sh 'java -version'
+                sh 'mvn -version'
+            }
+        }
+
         stage('Build') {
             steps {
-                echo 'Building the project...'
+                echo 'Compiling the project...'
                 sh 'mvn clean compile'
             }
         }
@@ -48,7 +49,6 @@ pipeline {
             }
             post {
                 always {
-                    // Publish JUnit test results
                     junit '**/target/surefire-reports/*.xml'
                 }
             }
@@ -63,7 +63,7 @@ pipeline {
 
         stage('Archive Artifacts') {
             steps {
-                echo 'Archiving artifacts...'
+                echo 'Archiving JAR artifacts...'
                 archiveArtifacts artifacts: '**/target/*.jar', fingerprint: true
             }
         }
@@ -71,23 +71,11 @@ pipeline {
 
     post {
         success {
-            echo 'Pipeline completed successfully!'
-            // Send notification on success (optional)
-            // emailext (
-            //     subject: "SUCCESS: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
-            //     body: "Build succeeded: ${env.BUILD_URL}",
-            //     to: "your-email@example.com"
-            // )
+            echo '✅ Pipeline completed successfully!'
         }
 
         failure {
-            echo 'Pipeline failed!'
-            // Send notification on failure (optional)
-            // emailext (
-            //     subject: "FAILURE: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
-            //     body: "Build failed: ${env.BUILD_URL}",
-            //     to: "your-email@example.com"
-            // )
+            echo '❌ Pipeline failed!'
         }
 
         always {
