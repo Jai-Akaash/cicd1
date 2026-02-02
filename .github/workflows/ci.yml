@@ -51,7 +51,7 @@ jobs:
       run: |
         mvn clean verify sonar:sonar \
           -Dsonar.projectKey=pavan-growfin_cicd \
-          -Dsonar.organization=pavan-growfin \
+          -Dsonar.organization=jai-akaash \
           -Dsonar.host.url=https://sonarcloud.io
 
     - name: Run Unit Tests
