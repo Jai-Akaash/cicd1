@@ -7,7 +7,7 @@ The Jenkinsfile is configured for **local Jenkins** using **SCM polling** instea
 - **Polling Interval**: Every 2 minutes
 - **No webhook required**: Works without exposing Jenkins to the internet
 
-## Quick Setup Steps
+## Quick Setup Step
 
 ### 1. Start Jenkins Locally
 
