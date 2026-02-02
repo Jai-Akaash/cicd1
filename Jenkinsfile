@@ -7,6 +7,8 @@ pipeline {
         PATH = "${JAVA_HOME}/bin:${env.PATH}"
     }
 
+
+    
     options {
         // Keep last 10 builds
         buildDiscarder(logRotator(numToKeepStr: '10'))
